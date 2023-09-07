@@ -12,6 +12,11 @@ pip3 install python-dotenv
 
 ## .env file
 
+```bash
+cd <path>/raspi_webcam
+nano .env
+```
+Add this lines to the file:
 ```
 # Server port
 PORT=5000
@@ -56,20 +61,11 @@ User=<user>
 [Install]
 WantedBy=multi-user.target
 ```
-Replace \<path\> with the full path to your app.py file. and run the commands below:
+Replace `<path>` with the full path to your app.py file and `<user>` with the raspi user. Then run the commands below:
 
-load file  
 ```bash
 sudo systemctl daemon-reload
-```
-
-enable service  
-```bash
 sudo systemctl enable raspi_webcam.service
-```
-
-start service  
-```bash
 sudo systemctl start raspi_webcam.service
 ```
 
