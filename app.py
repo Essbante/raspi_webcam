@@ -113,6 +113,36 @@ def update_env():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# route to get raspberry pi core voltage and temperature
+@app.route('/core-stats', methods=['GET'])
+def core_stats():
+    try:
+        output = subprocess.check_output(['vcgencmd', 'measure_temp'], text=True)
+        temperature = output.split('=')[1].split("'")[0]
+        output = subprocess.check_output(['vcgencmd', 'measure_volts'], text=True)
+        voltage = output.split('=')[1].split("'")[0]
+        return jsonify({"temperature": temperature, "voltage": voltage})
+    except subprocess.CalledProcessError as e:
+        return jsonify({"error": str(e)}), 500
+
+# route to get the last 10 logs entries from the service
+# raspi_webcam.service
+@app.route('/logs', methods=['GET'])
+def logs():
+    try:
+        output = subprocess.check_output(['journalctl', '-u', 'raspi_webcam.service', '-n', '10'], text=True)
+        return output
+    except subprocess.CalledProcessError as e:
+        return jsonify({"error": str(e)}), 500
+    
+# route to restart the service
+@app.route('/restart-service', methods=['POST'])
+def restart_service():
+    try:
+        output = subprocess.check_output(['sudo', 'systemctl', 'restart', 'raspi_webcam.service'], text=True)
+        return jsonify({"output": output.split('\n')})
+    except subprocess.CalledProcessError as e:
+        return jsonify({"error": str(e)}), 500
 
 def gen_frames():  
     while True:

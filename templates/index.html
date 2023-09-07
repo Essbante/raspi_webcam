@@ -2,21 +2,25 @@
 <html lang="en">
 
 <head>
-    <title>Camera Streams</title>
+    <title>Camera Stream</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+
         h1 {
             color: #333;
         }
+
         div {
             margin-bottom: 20px;
         }
+
         img {
             border: 3px solid #ccc;
         }
+
         button {
             font-size: 18px;
             padding: 10px 20px;
@@ -27,21 +31,32 @@
 </head>
 
 <body>
+
+
     <h1>Camera Stream</h1>
-    <div style="width: 50%;">
+    <div style="width: 70%;">
         <img id="camera0" src="/video_feed/" style="width: 100%;">
-    </div>    
-    <button id="shutdown">🌙 Shutdown</button>
-    <button id="reboot">🔃 Reboot</button>
-    <br>
+    </div>
+
+    <label id="raspi_stats">Stats:</label>
+
     <button id="start_snapshots">🆙 Start</button>
     <button id="stop_snapshots">🛑 Stop</button>
+    <button id="reboot">🔃 Reboot</button>
+    <button id="shutdown">🌙 Shutdown</button>
 
     <div>
         <label for="envSelect">Select Env Variable:</label>
         <select id="envSelect">
             <option value="PORT">PORT</option>
             <option value="DEV_VIDEO">DEV_VIDEO</option>
+            <option value="WIDTH">WIDTH</option>
+            <option value="FPS">FPS</option>
+            <option value="FINGERPRINT">FINGERPRINT</option>
+            <option value="TOKEN">TOKEN</option>
+            <option value="SNAPSHOT_POST_URL">SNAPSHOT_POST_URL</option>
+            <option value="SNAPSHOT_DELAY">SNAPSHOT_DELAY</option>
+            <option value="SNAPSHOT_PATH">SNAPSHOT_PATH</option>
         </select>
 
         <label for="envValue">Value:</label>
@@ -91,9 +106,29 @@
                 },
                 body: `env_name=${envName}&value=${value}`,
             })
-            .then(response => response.json())
-            .then(data => alert(JSON.stringify(data)));
+                .then(response => response.json())
+                .then(data => alert(JSON.stringify(data)));
         });
+
+        // Get the label element
+        const label = document.getElementById("raspi_stats");
+
+        // Function to update the label with the latest data
+        function updateLabel() {
+            // Make a request to the server to get the latest data
+            fetch("/core-stats")
+                .then(response => response.json())
+                .then(data => {
+                    // Update the label with the latest data
+                    label.innerText = `Temperature: ${data.temperature} Voltage: ${data.voltage}`;
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+
+        // Call the updateLabel function every 10 seconds
+        setInterval(updateLabel, 10000);
     </script>
 </body>
 
