@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Camera Streams</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        div {
+            margin-bottom: 20px;
+        }
+        img {
+            border: 3px solid #ccc;
+        }
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Camera Stream</h1>
+    <div style="width: 50%;">
+        <img id="camera0" src="/video_feed/" style="width: 100%;">
+    </div>    
+    <button id="shutdown">🌙 Shutdown</button>
+    <button id="reboot">🔃 Reboot</button>
+    <br>
+    <button id="start_snapshots">🆙 Start</button>
+    <button id="stop_snapshots">🛑 Stop</button>
+
+    <div>
+        <label for="envSelect">Select Env Variable:</label>
+        <select id="envSelect">
+            <option value="PORT">PORT</option>
+            <option value="DEV_VIDEO">DEV_VIDEO</option>
+        </select>
+
+        <label for="envValue">Value:</label>
+        <input type="text" id="envValue">
+
+        <button id="updateEnv">Update</button>
+    </div>
+
+    <script>
+        document.getElementById("shutdown").addEventListener("click", function () {
+            if (window.confirm("Are you sure you want to shut down the Raspberry Pi?")) {
+                fetch("/shutdown", { method: "POST" })
+                    .then(response => response.text())
+                    .then(data => alert(data));
+            }
+        });
+
+        document.getElementById("reboot").addEventListener("click", function () {
+            if (window.confirm("Are you sure you want to reboot the Raspberry Pi?")) {
+                fetch("/reboot", { method: "POST" })
+                    .then(response => response.text())
+                    .then(data => alert(data));
+            }
+        });
+
+        document.getElementById("start_snapshots").addEventListener("click", function () {
+            fetch("/start_snapshots", { method: "POST" })
+                .then(response => response.text())
+                .then(data => alert(data));
+        });
+
+        document.getElementById("stop_snapshots").addEventListener("click", function () {
+            fetch("/stop_snapshots", { method: "POST" })
+                .then(response => response.text())
+                .then(data => alert(data));
+        });
+
+        // Add event listener for Update button
+        document.getElementById("updateEnv").addEventListener("click", function () {
+            const envName = document.getElementById("envSelect").value;
+            const value = document.getElementById("envValue").value;
+
+            fetch("/update-env", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `env_name=${envName}&value=${value}`,
+            })
+            .then(response => response.json())
+            .then(data => alert(JSON.stringify(data)));
+        });
+    </script>
+</body>
+
+</html>
