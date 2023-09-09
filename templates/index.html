@@ -9,16 +9,27 @@
             margin: 20px;
         }
 
-        h1 {
-            color: #333;
+        nav {
+            display: flex;
+            justify-content: left;
+            align-items: center;
+            padding: 10px;
         }
 
-        div {
-            margin-bottom: 20px;
+        nav label,
+        #reboot,
+        #shutdown {
+            margin-right: 10px;
         }
 
-        img {
-            border: 3px solid #ccc;
+        .button-container {
+            display: flex;
+            align-items: center;
+        }
+
+        label {
+            margin-right: 10px;
+            font-weight: bold;
         }
 
         button {
@@ -26,25 +37,57 @@
             padding: 10px 20px;
             margin: 5px;
             cursor: pointer;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #start_snapshots {
+            background-color: #4CAF50;
+        }
+
+        #stop_snapshots {
+            background-color: #af4c4c;
+        }
+
+        #reboot,
+        #shutdown {
+            background-color: #4ca0af;
+        }
+
+        img {
+            border: 3px solid #ccc;
+            width: 100%;
         }
     </style>
 </head>
 
 <body>
 
+    <nav>
+        <label id="temperatureLabel">🌡️:</label>
+        <label id="voltageLabel">⚡:</label>
+        <label id="timeLabel">⏱️:</label>
+        <button id="reboot">🔃 Reboot</button>
+        <button id="shutdown">🌙 Shutdown</button>
+    </nav>
 
-    <h1>Camera Stream</h1>
-    <div style="width: 70%;">
-        <img id="camera0" src="/video_feed/" style="width: 100%;">
+    <div style="display: flex;">
+        <div style="width: 60%;">
+            <img id="camera0" src="/video_feed/">
+        </div>
     </div>
 
-    <label id="raspi_stats">Stats:</label>
-
-    <button id="start_snapshots">🆙 Start</button>
-    <button id="stop_snapshots">🛑 Stop</button>
-    <button id="reboot">🔃 Reboot</button>
-    <button id="shutdown">🌙 Shutdown</button>
-
+    <div class="button-container">
+        <label id="connect">🔴</label>
+        <span class="button-text">PRUSA Connect</span>
+        <button id="start_snapshots">Start</button>
+        <button id="stop_snapshots">Stop</button>
+    </div>
+    <div style="width: 60%;">
+        <textarea id="logsArea" rows="10" cols="150"></textarea>
+    </div>
     <div>
         <label for="envSelect">Select Env Variable:</label>
         <select id="envSelect">
@@ -58,10 +101,8 @@
             <option value="SNAPSHOT_DELAY">SNAPSHOT_DELAY</option>
             <option value="SNAPSHOT_PATH">SNAPSHOT_PATH</option>
         </select>
-
         <label for="envValue">Value:</label>
         <input type="text" id="envValue">
-
         <button id="updateEnv">Update</button>
     </div>
 
@@ -85,13 +126,19 @@
         document.getElementById("start_snapshots").addEventListener("click", function () {
             fetch("/start_snapshots", { method: "POST" })
                 .then(response => response.text())
-                .then(data => alert(data));
+                .then(data => {
+                    alert(data)
+                    document.getElementById("connect").innerText = "🟢"; 
+                });
         });
 
         document.getElementById("stop_snapshots").addEventListener("click", function () {
             fetch("/stop_snapshots", { method: "POST" })
                 .then(response => response.text())
-                .then(data => alert(data));
+                .then(data => {
+                    alert(data)
+                    document.getElementById("connect").innerText = "🔴"; 
+                });
         });
 
         // Add event listener for Update button
@@ -110,17 +157,29 @@
                 .then(data => alert(JSON.stringify(data)));
         });
 
-        // Get the label element
-        const label = document.getElementById("raspi_stats");
-
-        // Function to update the label with the latest data
+        // Function to update the label with the latest data and current time
         function updateLabel() {
-            // Make a request to the server to get the latest data
-            fetch("/core-stats")
+            const temperature = document.getElementById("temperatureLabel");
+            const voltage = document.getElementById("voltageLabel");
+            const time = document.getElementById("timeLabel");
+            const prusaConnect = document.getElementById("prusaConnectLabel");
+
+            fetch("/status")
                 .then(response => response.json())
                 .then(data => {
-                    // Update the label with the latest data
-                    label.innerText = `Temperature: ${data.temperature} Voltage: ${data.voltage}`;
+                    // Update the label with the latest data and current time
+                    temperature.innerText = `🌡️: ${data.temperature}`
+                    voltage.innerText = `⚡: ${data.voltage}`
+                    time.innerText = `⏱️: ${data.current_time}`
+                    prusaConnect.innerText = `PRUSA Connect: ${data.prusa_connect}`
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+
+            fetch("/logs").then(response => response.text())
+                .then(data => {
+                    document.getElementById("logsArea").value = data; // Update logs area with logs
                 })
                 .catch(error => {
                     console.error(error);
@@ -128,8 +187,10 @@
         }
 
         // Call the updateLabel function every 10 seconds
+        updateLabel();
         setInterval(updateLabel, 10000);
     </script>
+
 </body>
 
 </html>

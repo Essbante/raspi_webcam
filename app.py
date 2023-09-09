@@ -5,6 +5,7 @@ import subprocess
 import requests
 import threading
 import logging
+import datetime
 from dotenv import load_dotenv
 from camera import Camera
 from flask  import Flask, Response, render_template, request, jsonify
@@ -51,8 +52,7 @@ def index():
 
 @app.route('/video_feed/')
 def video_feed():
-    return Response(gen_frames(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/snapshot/')
 def snapshot():
@@ -61,6 +61,9 @@ def snapshot():
         return Response(status=500)
     else:
         return Response(frame, mimetype='image/jpeg')
+
+###############################################
+# PRUSA CONNECT SNAPSHOT
 
 # Define routes to start and stop the thread
 @app.route('/start_snapshots', methods=['POST'])
@@ -77,6 +80,9 @@ def stop_snapshots_route():
     running = False
     return 'Thread stopped'
 
+###############################################
+# PRUSA CONNECT SNAPSHOT
+
 @app.route('/list-devices', methods=['GET'])
 def list_devices():
     try:
@@ -85,9 +91,22 @@ def list_devices():
     except subprocess.CalledProcessError as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/status')
+# route to get raspberry pi core voltage and temperature
+@app.route('/status', methods=['GET'])
 def status():
-    return jsonify(status="running")
+    try:
+        output = subprocess.check_output(['vcgencmd', 'measure_temp'], text=True)
+        temperature = output.split('=')[1].split("'")[0]
+        output = subprocess.check_output(['vcgencmd', 'measure_volts'], text=True)
+        voltage = output.split('=')[1].split("'")[0]
+        now = datetime.datetime.now()
+        return jsonify({"temperature": temperature, 
+                        "voltage": voltage,
+                        "current_time": now.strftime("%Y-%m-%d %H:%M:%S"),
+                        "prusa_connect":running
+                        })
+    except subprocess.CalledProcessError as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/shutdown', methods=['POST'])
 def shutdown():
@@ -113,24 +132,14 @@ def update_env():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# route to get raspberry pi core voltage and temperature
-@app.route('/core-stats', methods=['GET'])
-def core_stats():
-    try:
-        output = subprocess.check_output(['vcgencmd', 'measure_temp'], text=True)
-        temperature = output.split('=')[1].split("'")[0]
-        output = subprocess.check_output(['vcgencmd', 'measure_volts'], text=True)
-        voltage = output.split('=')[1].split("'")[0]
-        return jsonify({"temperature": temperature, "voltage": voltage})
-    except subprocess.CalledProcessError as e:
-        return jsonify({"error": str(e)}), 500
+
 
 # route to get the last 10 logs entries from the service
 # raspi_webcam.service
 @app.route('/logs', methods=['GET'])
 def logs():
     try:
-        output = subprocess.check_output(['journalctl', '-u', 'raspi_webcam.service', '-n', '10'], text=True)
+        output = subprocess.check_output(['journalctl', '-u', 'raspi_webcam.service', '-n', '10'], universal_newlines=True, text=True)
         return output
     except subprocess.CalledProcessError as e:
         return jsonify({"error": str(e)}), 500
@@ -160,7 +169,7 @@ def upload_image(http_url, fingerprint, token, frame):
         'token': token,
     }
     response = requests.put(http_url, headers=headers, data=frame)
-    if response.status_code != 200:
+    if response.status_code != 204:
         logging.error(f'Request to {http_url} failed with status code {response.status_code}')
     return response
 
