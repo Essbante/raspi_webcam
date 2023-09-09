@@ -43,17 +43,8 @@
             cursor: pointer;
         }
 
-        #start_snapshots {
-            background-color: #4CAF50;
-        }
-
-        #stop_snapshots {
+        #cancel {
             background-color: #af4c4c;
-        }
-
-        #reboot,
-        #shutdown {
-            background-color: #4ca0af;
         }
 
         img {
@@ -65,27 +56,41 @@
 
 <body>
 
-    <nav>
-        <label id="temperatureLabel">🌡️:</label>
-        <label id="voltageLabel">⚡:</label>
-        <label id="timeLabel">⏱️:</label>
-        <button id="reboot">🔄️ Reboot</button>
-        <button id="shutdown">🌙 Shutdown</button>
-    </nav>
-
     <div style="display: flex;">
         <div style="width: 60%;">
             <img id="camera0" src="/video_feed/">
         </div>
     </div>
 
-    <div class="button-container">
+    <nav>
+        <label>PRUSA Connect</label>
         <label id="connect">🔴</label>
-        <span class="button-text">PRUSA Connect</span>
         <button id="start_snapshots">▶️ Start</button>
         <button id="stop_snapshots">⏹️ Stop</button>
-        <button id="restart">🔄️ Restart</button>
-    </div>
+    </nav>
+
+    <nav>
+        <label>Raspi</label>
+        <label id="temperatureLabel">🌡️:</label>
+        <label id="voltageLabel">⚡:</label>
+        <label id="timeLabel">⏱️:</label>
+        <button id="reboot">🔄️ Reboot</button>
+        <button id="shutdown">🌙 Shutdown</button>
+        <button id="restart">♻️ Service</button>
+    </nav>
+
+    <nav>
+        <label>PRUSA Link</label>
+        <label id="bedTemperatureLabel">🔳🌡️:</label>
+        <label id="nozzleTemperatureLabel">🔽🌡️:</label>
+        <label id="printaeStateLabel">❔:</label>
+        <label id="id">🆔:</label>
+        <label id="progressLabel">⌛:</label>
+        <button id="pause">⏸️ Pause</button>
+        <button id="resume">▶️ Resume</button>
+        <button id="cancel">❌ Cancel</button>
+    </nav>
+
     <div style="width: 60%;">
         <textarea id="logsArea" rows="10" cols="150"></textarea>
     </div>
@@ -133,12 +138,35 @@
             }
         });
 
+        document.getElementById("pause").addEventListener("click", function () {
+            if (window.confirm("Are you sure you want to pause the print?")) {
+                fetch("/prusa-link-pause", { method: "POST" })
+                    .then(response => response.text())
+                    .then(data => alert(data));
+            }
+        });
+
+        document.getElementById("resume").addEventListener("click", function () {
+            if (window.confirm("Are you sure you want to resume the print?")) {
+                fetch("/prusa-link-resume", { method: "POST" })
+                    .then(response => response.text())
+                    .then(data => alert(data));
+            }
+        });
+
+        document.getElementById("cancel").addEventListener("click", function () {
+            if (window.confirm("Are you sure you want to stop the print?")) {
+                fetch("/prusa-link-cancel", { method: "DELETE" })
+                    .then(response => response.text())
+                    .then(data => alert(data));
+            }
+        });
+
         // Function to update the label with the latest data and current time
         function updateLabel() {
             const temperature = document.getElementById("temperatureLabel");
             const voltage = document.getElementById("voltageLabel");
             const time = document.getElementById("timeLabel");
-            const prusaConnect = document.getElementById("prusaConnectLabel");
 
             fetch("/status")
                 .then(response => response.json())
@@ -147,7 +175,11 @@
                     temperature.innerText = `🌡️: ${data.temperature}`
                     voltage.innerText = `⚡: ${data.voltage}`
                     time.innerText = `⏱️: ${data.current_time}`
-                    prusaConnect.innerText = `PRUSA Connect: ${data.prusa_connect}`
+                    if (data.prusa_connect) {
+                        document.getElementById("connect").innerText = "🟢";
+                    } else {
+                        document.getElementById("connect").innerText = "🔴";
+                    }
                 })
                 .catch(error => {
                     console.error(error);
@@ -160,6 +192,29 @@
                 .catch(error => {
                     console.error(error);
                 });
+
+            // Fetch /prusa-link-status data
+            fetch("/prusa-link-status")
+                .then(response => response.json())
+                .then(data => {
+                    // Update the label with the latest data and current time
+                    document.getElementById("bedTemperatureLabel").innerText = `🔳🌡️: ${data.printer.temp_bed}`
+                    document.getElementById("nozzleTemperatureLabel").innerText = `🔽🌡️: ${data.printer.temp_nozzle}`
+                    document.getElementById("printaeStateLabel").innerText = `❔: ${data.printer.state}`
+                    // if data.job is defined
+                    if (data.job) {
+                        document.getElementById("id").innerText = `🆔: ${data.job.id}`
+                        document.getElementById("progressLabel").innerText = `⌛: ${data.job.progress}% ${data.job.time_remaining}`
+                    } else {
+                        document.getElementById("id").innerText = `🆔: -`
+                        document.getElementById("progressLabel").innerText = `⌛: -`
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+
+
         }
 
         // Call the updateLabel function every 10 seconds

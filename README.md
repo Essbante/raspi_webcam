@@ -38,6 +38,10 @@ SNAPSHOT_POST_URL=https://webcam.connect.prusa3d.com/c/snapshot
 SNAPSHOT_DELAY=10
 # Path to store the snapshot
 SNAPSHOT_PATH=/tmp/snapshot.jpg
+# PRUSA LINK IP (Printer local IP)
+PRUSA_LINK_IP=
+# PRUSA LINK API key (Printer token)
+PRUSA_LINK_API_KEY=
 ```
 
 ## Service setup
