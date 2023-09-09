@@ -148,8 +148,8 @@ def logs():
 @app.route('/restart-service', methods=['POST'])
 def restart_service():
     try:
-        output = subprocess.check_output(['sudo', 'systemctl', 'restart', 'raspi_webcam.service'], text=True)
-        return jsonify({"output": output.split('\n')})
+        output = subprocess.check_output(['sudo', 'systemctl', 'restart', 'raspi_webcam.service'], universal_newlines=True, text=True)
+        return output
     except subprocess.CalledProcessError as e:
         return jsonify({"error": str(e)}), 500
 
@@ -184,18 +184,6 @@ def post_snapshots():
         else:
             logging.error("No frame received")
         time.sleep(snapshot_delay)
-
-
-# this functions receives a .env variable name and a value and updates the .env file
-def update_env_file(env_name, value):
-    with open('.env', 'r') as f:
-        lines = f.readlines()
-    with open('.env', 'w') as f:
-        for line in lines:
-            if line.startswith(env_name):
-                f.write(f'{env_name}={value}\n')
-            else:
-                f.write(line)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=port)

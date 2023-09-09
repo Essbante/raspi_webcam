@@ -69,7 +69,7 @@
         <label id="temperatureLabel">🌡️:</label>
         <label id="voltageLabel">⚡:</label>
         <label id="timeLabel">⏱️:</label>
-        <button id="reboot">🔃 Reboot</button>
+        <button id="reboot">🔄️ Reboot</button>
         <button id="shutdown">🌙 Shutdown</button>
     </nav>
 
@@ -82,28 +82,12 @@
     <div class="button-container">
         <label id="connect">🔴</label>
         <span class="button-text">PRUSA Connect</span>
-        <button id="start_snapshots">Start</button>
-        <button id="stop_snapshots">Stop</button>
+        <button id="start_snapshots">▶️ Start</button>
+        <button id="stop_snapshots">⏹️ Stop</button>
+        <button id="restart">🔄️ Restart</button>
     </div>
     <div style="width: 60%;">
         <textarea id="logsArea" rows="10" cols="150"></textarea>
-    </div>
-    <div>
-        <label for="envSelect">Select Env Variable:</label>
-        <select id="envSelect">
-            <option value="PORT">PORT</option>
-            <option value="DEV_VIDEO">DEV_VIDEO</option>
-            <option value="WIDTH">WIDTH</option>
-            <option value="FPS">FPS</option>
-            <option value="FINGERPRINT">FINGERPRINT</option>
-            <option value="TOKEN">TOKEN</option>
-            <option value="SNAPSHOT_POST_URL">SNAPSHOT_POST_URL</option>
-            <option value="SNAPSHOT_DELAY">SNAPSHOT_DELAY</option>
-            <option value="SNAPSHOT_PATH">SNAPSHOT_PATH</option>
-        </select>
-        <label for="envValue">Value:</label>
-        <input type="text" id="envValue">
-        <button id="updateEnv">Update</button>
     </div>
 
     <script>
@@ -128,7 +112,7 @@
                 .then(response => response.text())
                 .then(data => {
                     alert(data)
-                    document.getElementById("connect").innerText = "🟢"; 
+                    document.getElementById("connect").innerText = "🟢";
                 });
         });
 
@@ -137,24 +121,16 @@
                 .then(response => response.text())
                 .then(data => {
                     alert(data)
-                    document.getElementById("connect").innerText = "🔴"; 
+                    document.getElementById("connect").innerText = "🔴";
                 });
         });
 
-        // Add event listener for Update button
-        document.getElementById("updateEnv").addEventListener("click", function () {
-            const envName = document.getElementById("envSelect").value;
-            const value = document.getElementById("envValue").value;
-
-            fetch("/update-env", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: `env_name=${envName}&value=${value}`,
-            })
-                .then(response => response.json())
-                .then(data => alert(JSON.stringify(data)));
+        document.getElementById("restart").addEventListener("click", function () {
+            if (window.confirm("Are you sure you want to restart the service?")) {
+                fetch("/restart-service", { method: "POST" })
+                    .then(response => response.text())
+                    .then(data => alert(data));
+            }
         });
 
         // Function to update the label with the latest data and current time
