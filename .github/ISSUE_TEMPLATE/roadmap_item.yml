@@ -51,7 +51,7 @@ body:
       required: true
   - type: markdown
     attributes:
-      value: "‼️### Sub-tasks    "
+      value: "### ‼️Sub-tasks    "
   - type: markdown
     attributes:
       value: | 
