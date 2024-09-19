@@ -42,9 +42,4 @@ body:
       required: true
   - type: markdown
     attributes:
-      value: "## Welcome!"
-  - type: markdown
-    attributes:
-      value: |
-        Thanks for taking the time to fill out this bug! If you need real-time help, join us on Discord
-        - [ ] test
+      value: "To add a sub tasks (child issues) add a (task list)[https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/about-task-lists] to the ´roadmap item´ first comment after it has been created"
