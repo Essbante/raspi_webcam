@@ -43,5 +43,5 @@ body:
   - type: markdown
     attributes:
       value: | 
-      '## Sub-tasks'
-      "To add sub-tasks (child issues), insert a [task list](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/about-task-lists) into the first comment of the 'roadmap item' after its creation."
+        '## Sub-tasks'
+        "To add sub-tasks (child issues), insert a [task list](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/about-task-lists) into the first comment of the 'roadmap item' after its creation."
