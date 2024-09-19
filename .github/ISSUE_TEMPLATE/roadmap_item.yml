@@ -2,7 +2,7 @@ name: Roadmap item
 description: A roadmap item is a high-level description of a desired outcome or goal in the project, defining the value to be delivered and assigning ownership for its execution.
 title: "[Roadmap item]: "
 labels: ["question"]
-projects: ["hyperledger/48"]
+projects: ["Essbante/4"]
 body:
   - type: textarea
     id: description
