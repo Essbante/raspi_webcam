@@ -8,14 +8,14 @@ body:
     id: description
     attributes:
       label: Short Description
-      description: A short description of the value we are building.
+      description: A short description of the value to be build.
     validations:
       required: true
   - type: textarea
     id: value-statement
     attributes:
       label: Value statement
-      description: A short paragraph describing our goal.
+      description: A short paragraph describing the goal.
       placeholder: "What is the successful end-state when this has been delivered? The value we want to deliver. If your goal starts with a verb ('launch', 'build', 'implement', etc) you probably have an action, so reframe it to describe the outcome that you want (eg: 'we want to enhance the privacy for our users when presenting proofs without reducing assurances for the verifier' is a better goal than 'implement AnonCreds'"
     validations:
       required: true
@@ -33,14 +33,14 @@ body:
       placeholder: Name
     validations:
       required: false
-  - type: input
+  - type: textarea
     id: components
     attributes:
       label: Components
       description: List the components within scope 
     validations:
       required: true
-  - type: input
+  - type: textarea
     id: team
     attributes:
       label: Team members
