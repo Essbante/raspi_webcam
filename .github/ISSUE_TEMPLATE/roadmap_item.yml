@@ -51,9 +51,6 @@ body:
       required: true
   - type: markdown
     attributes:
-      value: "### Sub-tasks‼️  "
-  - type: markdown
-    attributes:
       value: |
         > [!TIP]
         > To add sub-tasks (child issues), insert a [task list](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/about-task-lists) into the <ins>first comment</ins> of the 'roadmap item' after its creation.
