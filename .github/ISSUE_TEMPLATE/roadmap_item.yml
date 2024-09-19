@@ -37,6 +37,7 @@ body:
     id: components
     attributes:
       label: Components
+      placeholder: Component names
       description: List the components within scope 
     validations:
       required: true
@@ -44,6 +45,7 @@ body:
     id: team
     attributes:
       label: Team members
+      placeholder: Names
       description: List the people who will work on this
     validations:
       required: true
@@ -53,4 +55,4 @@ body:
   - type: markdown
     attributes:
       value: | 
-        To add sub-tasks (child issues), insert a [task list](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/about-task-lists) into the *first comment* of the 'roadmap item' after its creation.
+        To add sub-tasks (child issues), insert a [task list](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/about-task-lists) into the **first comment** of the 'roadmap item' after its creation.
